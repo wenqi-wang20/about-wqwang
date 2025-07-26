@@ -1,0 +1,281 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Road Trip Adventure - Wenqi Wang Photography</title>
+    <meta name="author" content="Wenqi Wang">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="../images/favicon/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    
+    <style>
+      .event-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      
+      .event-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+      
+      .event-date {
+        color: #888;
+        font-size: 16px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      
+      .event-title {
+        font-size: 36px;
+        color: #333;
+        margin: 0 0 15px 0;
+        font-weight: 600;
+      }
+      
+      .event-description {
+        color: #666;
+        font-size: 18px;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto 20px auto;
+      }
+      
+      .photo-count {
+        margin-top: 15px;
+      }
+      
+      .photo-count span {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      }
+      
+      .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 50px;
+        padding: 0 10px;
+      }
+      
+      .photo-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: white;
+      }
+      
+      .photo-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      }
+      
+      .photo-item img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+      }
+      
+      .photo-item:hover img {
+        transform: scale(1.05);
+      }
+      
+      /* Lightbox styles */
+      .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        cursor: pointer;
+      }
+      
+      .lightbox-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 95%;
+        max-height: 95%;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      }
+      
+      .lightbox img {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 0;
+      }
+      
+      .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+        transition: opacity 0.3s ease;
+      }
+      
+      .lightbox-close:hover {
+        opacity: 0.7;
+      }
+      
+      .back-link {
+        display: inline-block;
+        margin-bottom: 30px;
+        padding: 12px 24px;
+        background-color: #f8f9fa;
+        color: #333;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      
+      .back-link:hover {
+        background-color: #e9ecef;
+        transform: translateX(-3px);
+      }
+      
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-style: italic;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="event-container">
+      <a href="../gallery.html" class="back-link">← Back to Gallery</a>
+      
+      <div class="event-header">
+        <div class="event-date">June 2025</div>
+        <h1 class="event-title">Road Trip Adventure</h1>
+        <p class="event-description">
+          Western American journey filled with breathtaking landscapes, unexpected discoveries, and unforgettable moments. From Yosemite National Park to the Yellowstone National Park, crossing through California, Nevada, Utah, and Wyoming.
+        </p>
+        <div class="photo-count">
+          <span id="photo-count">Loading...</span>
+        </div>
+      </div>
+      
+      <!-- Photo grid that will be populated dynamically -->
+      <div id="photo-grid" class="photo-grid">
+        <div class="loading">
+          <p>Loading photos...</p>
+        </div>
+      </div>
+      
+      <!-- Lightbox for viewing large images -->
+      <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+          <img id="lightbox-img" src="" alt="Large view">
+        </div>
+      </div>
+      
+      <script>
+        // Gallery configuration
+        const galleryConfig = {
+          roadtrip: [
+            'DSC_7831 2.JPG',
+            'DSC_8089 2.JPG',
+            'DSC_8106 2.JPG',
+            'DSC_8125 2.JPG',
+            'IMG_0581.JPG',
+            'IMG_0622.JPG',
+            'IMG_2473 2.JPG',
+            'Snapseed 4.JPG',
+            'Snapseed 5.JPG',
+            'Snapseed 6.JPG'
+          ]
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+          const folderName = 'roadtrip';
+          const images = galleryConfig[folderName] || [];
+          
+          // Update photo count
+          document.getElementById('photo-count').textContent = `${images.length} Photo${images.length !== 1 ? 's' : ''}`;
+          
+          // Create photo grid
+          const photoGrid = document.getElementById('photo-grid');
+          photoGrid.innerHTML = '';
+          
+          if (images.length === 0) {
+            photoGrid.innerHTML = '<div class="loading"><p>No photos found in this gallery.</p></div>';
+            return;
+          }
+          
+          images.forEach((imageName, index) => {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.innerHTML = `<img src="../images/gallery/${folderName}/${imageName}" alt="Photo ${index + 1}" loading="lazy">`;
+            
+            photoItem.addEventListener('click', () => {
+              openLightbox(`../images/gallery/${folderName}/${imageName}`);
+            });
+            
+            photoGrid.appendChild(photoItem);
+          });
+          
+          // Lightbox functions
+          const lightbox = document.getElementById('lightbox');
+          const lightboxImg = document.getElementById('lightbox-img');
+          const lightboxClose = document.querySelector('.lightbox-close');
+          
+          function openLightbox(imageSrc) {
+            lightboxImg.src = imageSrc;
+            lightbox.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+          }
+          
+          function closeLightbox() {
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+          }
+          
+          lightboxClose.addEventListener('click', closeLightbox);
+          lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+          });
+          
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+          });
+        });
+      </script>
+      
+      <div style="text-align: center; margin-top: 60px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #666; font-size: 14px;">
+          © 2025 Wenqi Wang. All photographs are my original work.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
