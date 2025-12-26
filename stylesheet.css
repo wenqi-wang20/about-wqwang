@@ -102,6 +102,23 @@ h2 {
   font-weight: 700;
 }
 
+/* Research section font sizing */
+.paper {
+  font-size: 14.5px;
+}
+
+.paper a,
+.paper p,
+.paper strong,
+.paper em,
+.paper span {
+  font-size: 14.5px;
+}
+
+.paper .papertitle {
+  font-size: 16px;
+}
+
 .name {
   padding-top: 20px;
   margin: 0;
