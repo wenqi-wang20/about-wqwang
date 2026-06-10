@@ -51,8 +51,8 @@ def compress_image(input_path, output_path=None, quality=85, max_size_mb=2.0):
             current_quality = quality
             target_size = max_size_mb * 1024 * 1024  # 转换为字节
 
-            # 如果原文件已经很小，不需要压缩
-            if original_size <= target_size:
+            # 如果原文件已经很小且不需要格式转换，则跳过压缩
+            if original_size <= target_size and output_path == input_path:
                 print(f"⏭️  {os.path.basename(input_path)} 文件已经足够小，跳过压缩")
                 return True
 
@@ -63,8 +63,8 @@ def compress_image(input_path, output_path=None, quality=85, max_size_mb=2.0):
                 'optimize': True
             }
 
-            # 如果原文件是PNG，保持PNG格式
-            if input_path.lower().endswith('.png'):
+            # 根据输出文件扩展名决定保存格式
+            if output_path.lower().endswith('.png'):
                 save_kwargs = {
                     'format': 'PNG',
                     'optimize': True
@@ -77,13 +77,20 @@ def compress_image(input_path, output_path=None, quality=85, max_size_mb=2.0):
                 best_quality = current_quality
 
                 # 尝试不同质量设置，找到合适的压缩级别
-                for test_quality in [current_quality, 75, 65, 55, 45, 35]:
+                quality_candidates = [
+                    current_quality, 75, 65, 55, 45, 35, 30, 25, 20
+                ]
+                quality_candidates = list(dict.fromkeys(
+                    q for q in quality_candidates if q <= current_quality
+                ))
+
+                for test_quality in quality_candidates:
                     test_kwargs = save_kwargs.copy()
                     test_kwargs['quality'] = test_quality
                     img.save(temp_path, **test_kwargs)
                     test_size = os.path.getsize(temp_path)
 
-                    if test_size <= target_size or test_quality == 35:
+                    if test_size <= target_size or test_quality == quality_candidates[-1]:
                         best_quality = test_quality
                         break
 
@@ -106,7 +113,7 @@ def compress_image(input_path, output_path=None, quality=85, max_size_mb=2.0):
             print(
                 f"   文件大小: {original_size / 1024:.1f} KB → {compressed_size / 1024:.1f} KB")
             print(f"   压缩率: {compression_ratio:.1f}%")
-            if not input_path.lower().endswith('.png'):
+            if not output_path.lower().endswith('.png'):
                 print(
                     f"   质量: {best_quality if 'best_quality' in locals() else current_quality}")
             print()
@@ -143,6 +150,8 @@ def main():
                         help='目标最大文件大小(MB) (默认: 2.0)')
     parser.add_argument('--dry-run', action='store_true',
                         help='预览模式，不实际修改文件')
+    parser.add_argument('--convert-png-to-jpeg', action='store_true',
+                        help='将PNG源图压缩为同名JPEG，并在成功后移除gallery中的PNG副本')
 
     args = parser.parse_args()
 
@@ -161,6 +170,8 @@ def main():
     print(f"📂 在 {args.gallery_dir} 中找到 {len(image_files)} 个图片文件")
     print(f"⚙️  压缩设置: 质量={args.quality}, 最大文件大小={args.max_size}MB")
     print(f"📐 保持原始图片尺寸比例，只优化文件大小")
+    if args.convert_png_to_jpeg:
+        print("🖼️  PNG源图将转换为同名JPEG网页副本")
 
     if args.dry_run:
         print("🔍 预览模式 - 不会修改任何文件")
@@ -181,9 +192,23 @@ def main():
             print(
                 f"📋 预览: {os.path.basename(image_path)} ({original_size / 1024:.1f} KB) - {status}")
         else:
-            if compress_image(image_path, quality=args.quality, max_size_mb=args.max_size):
+            output_path = image_path
+            convert_png = (
+                args.convert_png_to_jpeg
+                and image_path.lower().endswith('.png')
+            )
+            if convert_png:
+                output_path = os.path.splitext(image_path)[0] + '.jpg'
+
+            if compress_image(
+                    image_path,
+                    output_path=output_path,
+                    quality=args.quality,
+                    max_size_mb=args.max_size):
                 success_count += 1
-                total_compressed_size += os.path.getsize(image_path)
+                total_compressed_size += os.path.getsize(output_path)
+                if convert_png:
+                    os.remove(image_path)
 
     # 显示总结
     print("=" * 60)
